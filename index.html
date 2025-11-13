@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Weather App</title>
+<style>
+/* === Reset & Basics === */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+body {
+    min-height: 100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:center;
+    background: linear-gradient(160deg, #0f2027, #203a43, #2c5364);
+    overflow:hidden;
+    position:relative;
+    color:#fff;
+    padding-top:50px;
+}
+
+/* === Heading === */
+h1 {
+    font-size:40px;
+    margin-bottom:40px;
+    text-align:center;
+    color:#FFD700;
+    text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+}
+
+/* === Glassmorphic Weather Box === */
+.box {
+    width:420px;
+    padding:40px;
+    border-radius:30px;
+    background: rgba(255,255,255,0.07);
+    backdrop-filter: blur(25px);
+    text-align:center;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    border:1px solid rgba(255,255,255,0.2);
+    position:relative;
+    z-index:10;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.box:hover { 
+    transform: scale(1.05); 
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+}
+
+/* === Input & Button === */
+.search {
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin-bottom:30px;
+}
+input {
+    padding:14px 20px;
+    border:none;
+    border-radius:15px;
+    outline:none;
+    width:65%;
+    font-size:16px;
+    font-weight:500;
+    background: rgba(255,255,255,0.2);
+    color:#fff;
+    transition:0.3s;
+}
+input::placeholder { color:#fff; }
+input:focus { background: rgba(255,255,255,0.35); }
+button {
+    padding:14px 26px;
+    border:none;
+    border-radius:15px;
+    background: linear-gradient(135deg, #00f2fe, #4facfe);
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover { transform:scale(1.05); box-shadow:0 8px 25px rgba(0,0,0,0.5); }
+
+/* === Weather Text === */
+.city { font-size:34px; font-weight:700; margin-bottom:8px; letter-spacing:1px;}
+.date { font-size:14px; margin-bottom:22px; color:#d3d3d3; }
+.temp { font-size:72px; font-weight:700; margin-bottom:12px; }
+.desc { font-size:20px; margin-bottom:28px; color:#e0e0e0; }
+
+/* === Weather Details === */
+.details {
+    display:flex;
+    justify-content:space-around;
+    font-size:15px;
+    color:#fff;
+}
+.details div {
+    background: rgba(255,255,255,0.12);
+    padding:18px;
+    border-radius:22px;
+    backdrop-filter: blur(10px);
+    text-align:center;
+    min-width:90px;
+}
+
+/* === Clouds === */
+.cloud {
+    position:absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius:50%;
+    filter: blur(12px);
+    animation: cloudmove 90s linear infinite;
+    z-index:5;
+}
+.cloud1 { width:260px; height:90px; top:10%; left:-300px; animation-delay:0s; }
+.cloud2 { width:200px; height:70px; top:35%; left:-350px; animation-delay:20s; }
+.cloud3 { width:180px; height:50px; top:55%; left:-400px; animation-delay:40s; }
+@keyframes cloudmove { 0% { left:-400px; } 100% { left:120%; } }
+
+/* === Rain === */
+.rain {
+    position:absolute;
+    width:2px;
+    height:20px;
+    background: rgba(173,216,230,0.7);
+    top:-20px;
+    animation: fall linear infinite;
+    opacity:0.7;
+    z-index:5;
+}
+@keyframes fall { to { transform: translateY(110vh); } }
+
+/* === Sun === */
+.sun {
+    position:absolute;
+    width:120px;
+    height:120px;
+    background: #FFD700;
+    border-radius:50%;
+    top:10%;
+    right:10%;
+    box-shadow: 0 0 80px #FFD700;
+    display:none;
+    animation: sunfloat 5s infinite alternate;
+    z-index:5;
+}
+@keyframes sunfloat { 0% { transform: translateY(0);} 50% { transform: translateY(8px);} 100% { transform: translateY(0);} }
+
+/* === Stars === */
+.star { position:absolute; width:2px; height:2px; background:white; border-radius:50%; opacity:0.8; animation: twinkle 2s infinite alternate; z-index:1;}
+@keyframes twinkle { 0%{opacity:0.3;} 100%{opacity:1;} }
+</style>
+</head>
+<body>
+
+<h1>🌤 Pro Weather App 🌦</h1>
+
+<!-- Clouds -->
+<div class="cloud cloud1"></div>
+<div class="cloud cloud2"></div>
+<div class="cloud cloud3"></div>
+
+<!-- Rain -->
+<!-- More rain drops for realistic effect -->
+<script>
+for(let i=0;i<30;i++){
+    let rain = document.createElement("div");
+    rain.className = "rain";
+    rain.style.left = Math.random()*100 + "%";
+    rain.style.animationDuration = (Math.random()*0.5 + 0.7) + "s";
+    document.body.appendChild(rain);
+}
+</script>
+
+<!-- Sun -->
+<div class="sun"></div>
+
+<!-- Weather Box -->
+<div class="box">
+    <div class="search">
+        <input type="text" id="cityInput" placeholder="Enter city name">
+        <button onclick="updateWeather()">Check</button>
+    </div>
+
+    <div class="city" id="cityName">Buenos Aires</div>
+    <div class="date" id="date">Friday, 7 November 2025</div>
+    <div class="temp" id="temperature">24°C</div>
+    <div class="desc" id="description">Clear Sky 🌤</div>
+    <div class="details">
+        <div id="humidity">💧55%<br>Humidity</div>
+        <div id="wind">💨9 km/h<br>Wind</div>
+        <div id="feels">🌡25°C<br>Feels Like</div>
+    </div>
+</div>
+
+<script>
+function updateWeather() {
+    let city = document.getElementById("cityInput").value.toLowerCase();
+    let cityName = document.getElementById("cityName");
+    let temperature = document.getElementById("temperature");
+    let description = document.getElementById("description");
+    let humidity = document.getElementById("humidity");
+    let wind = document.getElementById("wind");
+    let feels = document.getElementById("feels");
+    let sun = document.querySelector(".sun");
+    let clouds = document.querySelectorAll(".cloud");
+    let rains = document.querySelectorAll(".rain");
+
+    // Reset
+    sun.style.display="none";
+    clouds.forEach(c=>c.style.display="none");
+    rains.forEach(r=>r.style.display="none");
+
+    if(city==="karachi") {
+        cityName.innerHTML="Karachi";
+        temperature.innerHTML="38°C";
+        description.innerHTML="Sunny & Hot ☀";
+        humidity.innerHTML="💧30%<br>Humidity";
+        wind.innerHTML="💨15 km/h<br>Wind";
+        feels.innerHTML="🌡40°C<br>Feels Like";
+        sun.style.display="block";
+    } else if(city==="quetta") {
+        cityName.innerHTML="Quetta";
+        temperature.innerHTML="18°C";
+        description.innerHTML="Moderate Weather ⛅";
+        humidity.innerHTML="💧50%<br>Humidity";
+        wind.innerHTML="💨10 km/h<br>Wind";
+        feels.innerHTML="🌡18°C<br>Feels Like";
+        clouds.forEach(c=>c.style.display="block");
+    } else if(city==="multan") {
+        cityName.innerHTML="Multan";
+        temperature.innerHTML="26°C";
+        description.innerHTML="Raining 🌧";
+        humidity.innerHTML="💧80%<br>Humidity";
+        wind.innerHTML="💨12 km/h<br>Wind";
+        feels.innerHTML="🌡27°C<br>Feels Like";
+        rains.forEach(r=>r.style.display="block");
+    } else {
+        cityName.innerHTML="City not in list!";
+        temperature.innerHTML="--";
+        description.innerHTML="";
+        humidity.innerHTML="";
+        wind.innerHTML="";
+        feels.innerHTML="";
+    }
+}
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
